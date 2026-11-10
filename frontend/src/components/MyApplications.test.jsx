@@ -22,7 +22,7 @@ describe('MyApplications', () => {
 
     expect(screen.getByText('05:00')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Pay Admission Fee' })
+      screen.getByRole('button', { name: 'Pay Admission Fee (ভর্তি ফি দিন)' })
     ).toBeEnabled();
   });
 
@@ -35,12 +35,12 @@ describe('MyApplications', () => {
       />
     );
 
-    expect(screen.getByText('Expired')).toBeInTheDocument();
+    expect(screen.getByText('Expired (মেয়াদোত্তীর্ণ)')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Pay Admission Fee' })
+      screen.getByRole('button', { name: 'Pay Admission Fee (ভর্তি ফি দিন)' })
     ).toBeDisabled();
     expect(
-      screen.getByRole('button', { name: 'Cancel' })
+      screen.getByRole('button', { name: 'Cancel (বাতিল)' })
     ).toBeDisabled();
   });
 

@@ -30,17 +30,19 @@ export default function MyApplications({
   if (!studentValid)
     return (
       <p className="muted">
-        Enter your 17-digit birth registration number above to view your applications.
+        Enter your 17-digit birth registration number above to view your
+        applications. (আপনার আবেদনগুলো দেখতে উপরে শিক্ষার্থীর ১৭ সংখ্যার
+        জন্ম নিবন্ধন নম্বরটি লিখুন।)
       </p>
     );
 
-  if (loading && !holds)
-    return <p className="muted">Loading...</p>;
+  if (loading && !holds) return <p className="muted">Loading (লোড হচ্ছে)...</p>;
 
   if (!holds || holds.length === 0)
     return (
       <p className="muted">
-        This student has no applications yet.
+        This student has no applications yet. (এই শিক্ষার্থীর এখনও কোনো
+        আবেদন নেই।)
       </p>
     );
 
@@ -65,7 +67,8 @@ export default function MyApplications({
 
             {isHeld && (
               <p className="countdown">
-                Time remaining: <strong>{formatRemaining(remaining)}</strong>
+                Time remaining (অবশিষ্ট সময়):{' '}
+                <strong>{formatRemaining(remaining)}</strong>
               </p>
             )}
 
@@ -74,7 +77,7 @@ export default function MyApplications({
                 disabled={!isHeld || busyId === h.holdId}
                 onClick={() => onConfirm(h.holdId)}
               >
-                Pay Admission Fee
+                Pay Admission Fee (ভর্তি ফি দিন)
               </button>
 
               <button
@@ -82,7 +85,7 @@ export default function MyApplications({
                 disabled={!isHeld || busyId === h.holdId}
                 onClick={() => onCancel(h.holdId)}
               >
-                Cancel
+                Cancel (বাতিল)
               </button>
             </div>
           </article>

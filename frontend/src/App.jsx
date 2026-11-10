@@ -36,16 +36,16 @@ function SiteHeader() {
       <div className="header-inner">
         <Link to="/" className="brand">
           <span className="brand-mark">SA</span>
-          <span>School Admission Portal</span>
+          <span>School Admission Portal (স্কুল ভর্তি পোর্টাল)</span>
         </Link>
 
         <nav className="header-nav" aria-label="Main navigation">
           <NavLink to="/" end>
-            Student Portal
+            Student Portal (শিক্ষার্থী পোর্টাল)
           </NavLink>
 
           <NavLink to="/admin">
-            Administration
+            Administration (প্রশাসন)
           </NavLink>
         </nav>
       </div>
@@ -141,25 +141,29 @@ function StudentPortal() {
     run(
       classId,
       () => applyToClass(classId, studentId),
-      'Your application has been submitted successfully.'
+      'Your application has been submitted successfully. (আপনার আবেদন সফলভাবে জমা হয়েছে।)'
     );
 
   const onConfirm = (holdId) =>
     run(
       holdId,
       () => confirmHold(holdId, studentId),
-      'Your admission has been confirmed successfully.'
+      'Your admission has been confirmed successfully. (আপনার ভর্তি সফলভাবে নিশ্চিত হয়েছে।)'
     );
 
   const onCancel = (holdId) => {
-    if (!window.confirm('Are you sure you want to cancel this application?')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to cancel this application? (আপনি কি নিশ্চিত যে এই আবেদনটি বাতিল করতে চান?)'
+      )
+    ) {
       return Promise.resolve(false);
     }
 
     return run(
       holdId,
       () => cancelHold(holdId, studentId),
-      'Your application has been cancelled successfully.'
+      'Your application has been cancelled successfully. (আপনার আবেদন সফলভাবে বাতিল হয়েছে।)'
     );
   };
 
@@ -174,9 +178,11 @@ function StudentPortal() {
       <main className="container">
         <section className="page-header">
           <div>
-            <h1>Student Admission Portal</h1>
+            <h1>Student Admission Portal (শিক্ষার্থী ভর্তি পোর্টাল)</h1>
             <p className="page-description">
               Browse available classes and manage your admission applications.
+              (উপলব্ধ শ্রেণিগুলো দেখুন এবং আপনার ভর্তি আবেদনগুলো পরিচালনা
+              করুন।)
             </p>
           </div>
         </section>
@@ -198,16 +204,17 @@ function StudentPortal() {
         />
 
         <nav className="tabs" aria-label="Student sections">
-          <a href="#available-classes">Available Classes</a>
-          <a href="#my-applications">My Applications</a>
+          <a href="#available-classes">Available Classes (উপলব্ধ শ্রেণি)</a>
+          <a href="#my-applications">My Applications (আমার আবেদন)</a>
         </nav>
 
         <section id="available-classes">
           <div className="panel-header">
             <div>
-              <h2>Available Classes</h2>
+              <h2>Available Classes (উপলব্ধ শ্রেণি)</h2>
               <p className="muted">
-                Choose a class with available seats to apply.
+                Choose a class with available seats to apply. (উপলব্ধ আসন আছে
+                এমন একটি শ্রেণিতে আবেদন করুন।)
               </p>
             </div>
           </div>
@@ -226,9 +233,10 @@ function StudentPortal() {
         <section id="my-applications">
           <div className="panel-header">
             <div>
-              <h2>My Applications</h2>
+              <h2>My Applications (আমার আবেদন)</h2>
               <p className="muted">
-                Track your seat holds and admission status.
+                Track your seat holds and admission status. (আপনার আসন
+                সংরক্ষণ ও ভর্তির অবস্থা অনুসরণ করুন।)
               </p>
             </div>
 
@@ -238,7 +246,7 @@ function StudentPortal() {
                 className="secondary"
                 onClick={refreshAll}
               >
-                Refresh
+                Refresh (রিফ্রেশ)
               </button>
             )}
           </div>
@@ -256,7 +264,8 @@ function StudentPortal() {
         </section>
 
         <footer className="site-footer">
-          School Admission Portal · Student Services
+          School Admission Portal · Student Services (স্কুল ভর্তি পোর্টাল ·
+          শিক্ষার্থী সেবা)
         </footer>
       </main>
     </>
@@ -288,7 +297,7 @@ function AdminDashboard() {
 
       setNotice({
         type: 'ok',
-        text: 'Class created successfully.',
+        text: 'Class created successfully. (শ্রেণি সফলভাবে তৈরি হয়েছে।)',
       });
 
       refreshClasses();
@@ -338,9 +347,11 @@ function AdminDashboard() {
       <main className="container">
         <section className="page-header">
           <div>
-            <h1>Administration Dashboard</h1>
+            <h1>Administration Dashboard (প্রশাসনিক ড্যাশবোর্ড)</h1>
             <p className="page-description">
               Manage admission classes and monitor seat availability.
+              (ভর্তি শ্রেণিগুলো পরিচালনা করুন এবং আসনের প্রাপ্যতা
+              পর্যবেক্ষণ করুন।)
             </p>
           </div>
 
@@ -349,13 +360,16 @@ function AdminDashboard() {
             className="secondary"
             onClick={refreshClasses}
           >
-            Refresh Data
+            Refresh Data (ডেটা রিফ্রেশ করুন)
           </button>
         </section>
 
         <div className="banner error">
           Administrative access is not protected by authentication in this
-          version. Do not expose this dashboard publicly as a secure admin area.
+          version. Do not expose this dashboard publicly as a secure admin
+          area. (এই সংস্করণে প্রশাসনিক অ্যাক্সেস কোনো প্রমাণীকরণ দ্বারা
+          সুরক্ষিত নয়। নিরাপদ অ্যাডমিন এরিয়া হিসেবে এই ড্যাশবোর্ড প্রকাশ্যে
+          উন্মুক্ত করবেন না।)
         </div>
 
         <Notice
@@ -370,34 +384,36 @@ function AdminDashboard() {
         )}
 
         <section>
-          <h2>Admission Overview</h2>
+          <h2>Admission Overview (ভর্তির সারসংক্ষেপ)</h2>
 
           {classes.loading && !classes.data ? (
-            <p className="loading">Loading admission statistics...</p>
+            <p className="loading">
+              Loading admission statistics... (ভর্তির পরিসংখ্যান লোড হচ্ছে...)
+            </p>
           ) : (
             <div className="stat-grid">
               <div className="stat-card">
-                <div className="stat-label">Total Classes</div>
+                <div className="stat-label">Total Classes (মোট শ্রেণি)</div>
                 <div className="stat-value">{totalClasses}</div>
               </div>
 
               <div className="stat-card">
-                <div className="stat-label">Total Seats</div>
+                <div className="stat-label">Total Seats (মোট আসন)</div>
                 <div className="stat-value">{totalSeats}</div>
               </div>
 
               <div className="stat-card">
-                <div className="stat-label">Seats on Hold</div>
+                <div className="stat-label">Seats on Hold (সংরক্ষিত আসন)</div>
                 <div className="stat-value">{heldSeats}</div>
               </div>
 
               <div className="stat-card success">
-                <div className="stat-label">Confirmed Seats</div>
+                <div className="stat-label">Confirmed Seats (নিশ্চিত আসন)</div>
                 <div className="stat-value">{confirmedSeats}</div>
               </div>
 
               <div className="stat-card success">
-                <div className="stat-label">Available Seats</div>
+                <div className="stat-label">Available Seats (উপলব্ধ আসন)</div>
                 <div className="stat-value">{availableSeats}</div>
               </div>
             </div>
@@ -407,9 +423,10 @@ function AdminDashboard() {
         <section className="panel">
           <div className="panel-header">
             <div>
-              <h2>Create a Class</h2>
+              <h2>Create a Class (শ্রেণি তৈরি করুন)</h2>
               <p className="muted">
-                Add a new class and define its total seat capacity.
+                Add a new class and define its total seat capacity. (নতুন একটি
+                শ্রেণি যোগ করুন এবং এর মোট আসন সংখ্যা নির্ধারণ করুন।)
               </p>
             </div>
           </div>
@@ -423,19 +440,20 @@ function AdminDashboard() {
         <section className="panel">
           <div className="panel-header">
             <div>
-              <h2>Class Overview</h2>
+              <h2>Class Overview (শ্রেণির সারসংক্ষেপ)</h2>
               <p className="muted">
-                Current seat allocation for each class.
+                Current seat allocation for each class. (প্রতিটি শ্রেণির
+                বর্তমান আসন বণ্টন।)
               </p>
             </div>
           </div>
 
           {classes.loading && classItems.length === 0 ? (
-            <p className="loading">Loading classes...</p>
+            <p className="loading">Loading classes... (শ্রেণিগুলো লোড হচ্ছে...)</p>
           ) : classItems.length === 0 ? (
             <div className="empty-state">
-              <h3>No classes created yet</h3>
-              <p>Create your first class using the form above.</p>
+              <h3>No classes created yet (এখনও কোনো শ্রেণি তৈরি হয়নি)</h3>
+              <p>Create your first class using the form above. (উপরের ফর্ম ব্যবহার করে আপনার প্রথম শ্রেণিটি তৈরি করুন।)</p>
             </div>
           ) : (
             <div className="grid">
@@ -445,22 +463,22 @@ function AdminDashboard() {
 
                   <dl className="seats">
                     <div>
-                      <dt>Total</dt>
+                      <dt>Total (মোট)</dt>
                       <dd>{item.totalSeats}</dd>
                     </div>
 
                     <div>
-                      <dt>Held</dt>
+                      <dt>Held (সংরক্ষিত)</dt>
                       <dd>{item.heldSeats}</dd>
                     </div>
 
                     <div>
-                      <dt>Confirmed</dt>
+                      <dt>Confirmed (নিশ্চিত)</dt>
                       <dd>{item.confirmedSeats}</dd>
                     </div>
 
                     <div className="avail">
-                      <dt>Available</dt>
+                      <dt>Available (উপলব্ধ)</dt>
                       <dd>{item.availableSeats}</dd>
                     </div>
                   </dl>
@@ -471,7 +489,8 @@ function AdminDashboard() {
         </section>
 
         <footer className="site-footer">
-          School Admission Portal · Administration
+          School Admission Portal · Administration (স্কুল ভর্তি পোর্টাল ·
+          প্রশাসন)
         </footer>
       </main>
     </>

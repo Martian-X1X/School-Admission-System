@@ -11,12 +11,12 @@ export default function AdminPanel({ onCreate, busy }) {
     const n = Number(seats);
 
     if (!name.trim()) {
-      return setLocalError('Please enter the class name.');
+      return setLocalError('Please enter the class name. (অনুগ্রহ করে শ্রেণির নাম লিখুন।)');
     }
 
     if (!Number.isInteger(n) || n < 1) {
       return setLocalError(
-        'The number of seats must be a positive integer (1 or greater).'
+        'The number of seats must be a positive integer (1 or greater). (আসন সংখ্যা অবশ্যই ১ বা তার বেশি পূর্ণসংখ্যা হতে হবে।)'
       );
     }
 
@@ -32,11 +32,11 @@ export default function AdminPanel({ onCreate, busy }) {
 
   return (
     <section className="card">
-      <h2>Create a New Class (School Administrator)</h2>
+      <h2>Create a New Class (নতুন শ্রেণি তৈরি করুন)</h2>
 
       <form onSubmit={submit} className="admin-form">
         <label>
-          Class and Shift Name
+          Class and Shift Name (শ্রেণি ও শিফটের নাম)
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -46,7 +46,7 @@ export default function AdminPanel({ onCreate, busy }) {
         </label>
 
         <label>
-          Total Seats
+          Total Seats (মোট আসন)
           <input
             type="number"
             min="1"
@@ -61,7 +61,7 @@ export default function AdminPanel({ onCreate, busy }) {
         )}
 
         <button type="submit" disabled={busy}>
-          Create Class
+          Create Class (শ্রেণি তৈরি করুন)
         </button>
       </form>
     </section>

@@ -6,7 +6,8 @@ export default function StudentBar({ value, onChange }) {
   return (
     <section className="card student-bar">
       <label htmlFor="studentId">
-        Student Birth Registration Number (17 Digits)
+        Student Birth Registration Number - 17 Digits (শিক্ষার্থীর জন্ম
+        নিবন্ধন নম্বর - ১৭ সংখ্যা)
       </label>
 
       <input
@@ -22,6 +23,14 @@ export default function StudentBar({ value, onChange }) {
       {value !== '' && !valid && (
         <p className="hint error-text">
           {value.length}/17 digits — The number must contain exactly 17 digits.
+          (নম্বরটি অবশ্যই ঠিক ১৭ সংখ্যার হতে হবে।)
+        </p>
+      )}
+
+      {valid && (
+        <p className="hint ok-text">
+          The number is valid. It will be used as the student's identification.
+          (নম্বরটি সঠিক। এটি শিক্ষার্থীর পরিচয় হিসেবে ব্যবহৃত হবে।)
         </p>
       )}
 
