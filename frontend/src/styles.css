@@ -1,0 +1,39 @@
+:root { --bg:#f4f6fa; --card:#fff; --text:#1c2430; --muted:#657080; --primary:#1f6feb; --ok:#1a7f37; --err:#c62828; --warn:#b26a00; --border:#dde3ec; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#12161c; --card:#1b212b; --text:#e6ebf2; --muted:#9aa6b6; --border:#2c3542; }
+}
+* { box-sizing: border-box; }
+body { margin:0; font-family: "Noto Sans Bengali", system-ui, sans-serif; background:var(--bg); color:var(--text); }
+.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+h1 { margin: 8px 0 0; font-size: 1.6rem; }
+h2, h3 { margin: 0 0 8px; }
+.muted, .hint { color: var(--muted); }
+.hint { font-size: .85rem; margin: 6px 0 0; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin: 12px 0; }
+.student-bar input { width: 100%; font-size: 1.1rem; letter-spacing: .08em; }
+input { padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); width: 100%; }
+label { display: block; margin-bottom: 10px; font-weight: 600; }
+label input { margin-top: 4px; font-weight: 400; }
+button { padding: 9px 14px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; font-weight: 600; cursor: pointer; }
+button.secondary { background: transparent; color: var(--err); border: 1px solid var(--err); }
+button.link { background: transparent; color: inherit; padding: 0 6px; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.tabs { display: flex; gap: 8px; margin: 14px 0 4px; flex-wrap: wrap; }
+.tabs button { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.tabs button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.seats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0 12px; text-align: center; }
+.seats dt { font-size: .75rem; color: var(--muted); }
+.seats dd { margin: 0; font-size: 1.3rem; font-weight: 700; }
+.seats .avail dd { color: var(--ok); }
+.hold-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.badge { padding: 3px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; border: 1px solid currentColor; }
+.badge-held { color: var(--warn); } .badge-confirmed { color: var(--ok); }
+.badge-expired, .badge-cancelled { color: var(--muted); }
+.countdown strong { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.actions { display: flex; gap: 8px; margin-top: 8px; }
+.banner { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; margin: 10px 0; }
+.banner.ok { background: #1a7f3720; color: var(--ok); border: 1px solid var(--ok); }
+.banner.error { background: #c6282820; color: var(--err); border: 1px solid var(--err); }
+.error-text { color: var(--err); } .ok-text { color: var(--ok); }
+.admin-form { max-width: 420px; }
