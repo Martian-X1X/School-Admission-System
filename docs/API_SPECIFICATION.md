@@ -20,21 +20,21 @@ All error responses use RFC 7807 Problem Details:
 
 | # | Method | Path | Purpose | Success |
 |---|---|---|---|---|
-| 1 | POST | `/api/classes` | Create class | 201 |
-| 2 | GET | `/api/classes` | List classes with seat counts | 200 |
-| 3 | GET | `/api/classes/{classId}` | Class details | 200 |
-| 4 | POST | `/api/classes/{classId}/holds` | Create hold | 201 |
-| 5 | GET | `/api/holds/{holdId}` | Hold details | 200 |
-| 6 | POST | `/api/holds/{holdId}/confirm` | Confirm admission | 200 |
-| 7 | DELETE | `/api/holds/{holdId}` | Cancel hold | 204 |
-| 8 | GET | `/api/me/holds` | Student's applications | 200 |
+| 1 | POST | `/classes` | Create class | 201 |
+| 2 | GET | `/classes` | List classes with seat counts | 200 |
+| 3 | GET | `/classes/{classId}` | Class details | 200 |
+| 4 | POST | `/classes/{classId}/holds` | Create hold | 201 |
+| 5 | GET | `/holds/{holdId}` | Hold details | 200 |
+| 6 | POST | `/holds/{holdId}/confirm` | Confirm admission | 200 |
+| 7 | DELETE | `/holds/{holdId}` | Cancel hold | 204 |
+| 8 | GET | `/me/holds` | Student's applications | 200 |
 
 Status codes: 400 invalid input, 404 missing class/hold, 403 not owner, 409 seat
 unavailable / duplicate application / invalid transition, 201 created, 200 ok, 204 no content.
 
 ### 1. Create class
 
-`POST /api/classes`
+`POST /classes`
 
 ```json
 { "name": "Class 6 - Morning Shift", "totalSeats": 120 }
@@ -48,7 +48,7 @@ unavailable / duplicate application / invalid transition, 201 created, 200 ok, 2
 
 ### 2. List classes
 
-`GET /api/classes` → 200:
+`GET /classes` → 200:
 
 ```json
 [
@@ -67,11 +67,11 @@ unavailable / duplicate application / invalid transition, 201 created, 200 ok, 2
 
 ### 3. Class details
 
-`GET /api/classes/{classId}` → 200 (same shape as one list item). 404 if unknown.
+`GET /classes/{classId}` → 200 (same shape as one list item). 404 if unknown.
 
 ### 4. Create hold
 
-`POST /api/classes/{classId}/holds` with header `X-Student-Id: 20152691234567890` → 201:
+`POST /classes/{classId}/holds` with header `X-Student-Id: 20152691234567890` → 201:
 
 ```json
 {
@@ -87,7 +87,7 @@ unavailable / duplicate application / invalid transition, 201 created, 200 ok, 2
 
 ### 5. Get hold
 
-`GET /api/holds/{holdId}` → 200:
+`GET /holds/{holdId}` → 200:
 
 ```json
 { "holdId": "…", "classId": "…", "status": "HELD", "expiresAt": "2026-11-01T04:10:00Z" }
@@ -97,7 +97,7 @@ unavailable / duplicate application / invalid transition, 201 created, 200 ok, 2
 
 ### 6. Confirm hold
 
-`POST /api/holds/{holdId}/confirm` with `X-Student-Id` → 200:
+`POST /holds/{holdId}/confirm` with `X-Student-Id` → 200:
 
 ```json
 { "holdId": "…", "status": "CONFIRMED" }
@@ -107,14 +107,14 @@ unavailable / duplicate application / invalid transition, 201 created, 200 ok, 2
 
 ### 7. Cancel hold
 
-`DELETE /api/holds/{holdId}` with `X-Student-Id` → 204 (no body).
+`DELETE /holds/{holdId}` with `X-Student-Id` → 204 (no body).
 
 403 not owner; 404 unknown; 409 invalid transition (e.g. cancelling a CONFIRMED or EXPIRED hold);
 idempotent 204 when already cancelled.
 
 ### 8. My applications
 
-`GET /api/me/holds` with `X-Student-Id` → 200:
+`GET /me/holds` with `X-Student-Id` → 200:
 
 ```json
 [
