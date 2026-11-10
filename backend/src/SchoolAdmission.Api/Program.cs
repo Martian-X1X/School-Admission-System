@@ -30,9 +30,16 @@ builder.Services.AddHostedService<HoldExpiryWorker>();
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
     .AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("Date")));
 
+// ---- Swagger configuration ----
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 app.UseCors();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // ---- one place that turns exceptions into JSON error bodies; client mistakes are always 4xx ----
 app.Use(async (ctx, next) =>

@@ -77,42 +77,86 @@ public sealed class AdmissionService(NpgsqlDataSource db, AdmissionOptions optio
         // 3. One active application per student per class.
         var alreadyApplied = await conn.ExecuteScalarAsync<bool>(new CommandDefinition(
             """
-            SELECT EXISTS (SELECT 1 FROM admission_holds
-                           WHERE class_id = @classId AND student_id = @studentId
-                             AND status IN ('HELD','CONFIRMED'))
+            SELECT EXISTS (
+                SELECT 1
+                FROM admission_holds
+                WHERE class_id = @classId
+                AND student_id = @studentId
+                AND (
+                    status = 'CONFIRMED'
+                    OR (status = 'HELD' AND expires_at > clock_timestamp())
+                )
+            )
             """, new { classId, studentId }, tx, cancellationToken: ct));
         if (alreadyApplied)
             throw ApiException.Conflict("ALREADY_APPLIED", "This student already has an active application for this class.");
 
+       
         // 4. Capacity check.
-        var occupied = await conn.ExecuteScalarAsync<int>(new CommandDefinition(
-            "SELECT COUNT(*)::int FROM admission_holds WHERE class_id = @classId AND status IN ('HELD','CONFIRMED')",
-            new { classId }, tx, cancellationToken: ct));
-        if (occupied >= totalSeats)
-            throw ApiException.Conflict("SEATS_FULL", "No seats are available in this class.");
+        var occupied = await conn.ExecuteScalarAsync<int>(
+            new CommandDefinition(
+                """
+                SELECT COUNT(*)::int
+                FROM admission_holds
+                WHERE class_id = @classId
+                AND (
+                    status = 'CONFIRMED'
+                    OR (status = 'HELD' AND expires_at > clock_timestamp())
+                )
+                """,
+                new { classId }, tx, cancellationToken: ct));
 
-        // 5. Insert the hold; created_at / expires_at both come from the DB clock.
+        if (occupied >= totalSeats)
+        {
+            throw ApiException.Conflict(
+                "SEATS_FULL",
+                "No seats are available in this class.");
+        }
+
+        // 5. Insert the hold.
         try
         {
-            var hold = await conn.QuerySingleAsync<HoldCreated>(new CommandDefinition(
-                """
-                WITH t AS (SELECT clock_timestamp() AS n)
-                INSERT INTO admission_holds (id, class_id, student_id, status, created_at, expires_at)
-                SELECT @id, @classId, @studentId, 'HELD', t.n, t.n + make_interval(secs => @secs::float8)
-                FROM t
-                RETURNING id AS "HoldId", class_id AS "ClassId", student_id AS "StudentId",
-                          status AS "Status", expires_at AS "ExpiresAt"
-                """,
-                new { id = Guid.NewGuid(), classId, studentId, secs = options.HoldDurationSeconds },
-                tx, cancellationToken: ct));
+            var hold = await conn.QuerySingleAsync<HoldCreated>(
+                new CommandDefinition(
+                    """
+                    WITH t AS (SELECT clock_timestamp() AS n)
+                    INSERT INTO admission_holds
+                        (id, class_id, student_id, status, created_at, expires_at)
+                    SELECT
+                        @id, @classId, @studentId, 'HELD',
+                        t.n,
+                        t.n + make_interval(secs => @secs::float8)
+                    FROM t
+                    RETURNING
+                        id AS "HoldId",
+                        class_id AS "ClassId",
+                        student_id AS "StudentId",
+                        status AS "Status",
+                        expires_at AS "ExpiresAt"
+                    """,
+                    new
+                    {
+                        id = Guid.NewGuid(),
+                        classId,
+                        studentId,
+                        secs = options.HoldDurationSeconds
+                    },
+                    tx,
+                    cancellationToken: ct));
+
             await tx.CommitAsync(ct);
             return hold;
         }
-        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+        catch (PostgresException ex)
+            when (ex.SqlState == PostgresErrorCodes.UniqueViolation
+                && ex.ConstraintName == "uq_hold_active_student_class")
         {
-            throw ApiException.Conflict("ALREADY_APPLIED", "This student already has an active application for this class.");
+            throw ApiException.Conflict(
+                "ALREADY_APPLIED",
+                "This student already has an active application for this class.");
         }
     }
+
 
     public async Task<HoldView> GetHoldAsync(Guid holdId, CancellationToken ct)
     {
