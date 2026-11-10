@@ -1,0 +1,30 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+*.log
+TestResults/
+*.trx
+
+# Node
+node_modules/
+dist/
+.vite/
+npm-debug.log*
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# Local database dumps / backups
+*.sql.bak
+*.dump
+*.backup
+
+# OS files
+Thumbs.db
+.DS_Store
