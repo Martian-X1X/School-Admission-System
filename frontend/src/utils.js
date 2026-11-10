@@ -14,29 +14,29 @@ export function effectiveStatus(hold, nowMs) {
 }
 
 export const STATUS_LABELS = {
-  HELD: 'অপেক্ষমাণ (আসন ধরে রাখা হয়েছে)',
-  CONFIRMED: 'ভর্তি নিশ্চিত',
-  EXPIRED: 'মেয়াদ শেষ',
-  CANCELLED: 'বাতিল',
+  HELD: "Seat on Hold",
+  CONFIRMED: "Admission Confirmed",
+  EXPIRED: "Expired",
+  CANCELLED: "Cancelled",
 };
 
 const MESSAGES = {
   NETWORK:
-    'সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না। সার্ভার চালু আছে কিনা দেখুন, তারপর আবার চেষ্টা করুন।',
-  SEATS_FULL: 'দুঃখিত, এই ক্লাসের সব আসন পূর্ণ হয়ে গেছে।',
+    'Unable to connect to the server. Please check whether the server is running and try again.',
+  SEATS_FULL: 'Sorry, all seats in this class are currently full.',
   ALREADY_APPLIED:
-    'এই শিক্ষার্থী এই ক্লাসে ইতিমধ্যে আবেদন করেছে (অপেক্ষমাণ বা নিশ্চিত)।',
+    'This student has already applied for this class (pending or confirmed).',
   HOLD_EXPIRED:
-    'আবেদনের মেয়াদ শেষ হয়ে গেছে এবং আসনটি অন্যদের জন্য খুলে গেছে। চাইলে আবার আবেদন করুন।',
-  HOLD_CANCELLED: 'এই আবেদনটি আগেই বাতিল করা হয়েছে।',
-  ALREADY_CONFIRMED: 'ভর্তি ইতিমধ্যে নিশ্চিত হয়ে গেছে, তাই বাতিল করা যাবে না।',
-  NOT_OWNER: 'এই আবেদনটি এই শিক্ষার্থীর নয়।',
-  INVALID_STUDENT_ID: 'জন্ম নিবন্ধন নম্বর অবশ্যই ১৭ অঙ্কের হতে হবে।',
-  NOT_FOUND: 'যা খুঁজছেন তা পাওয়া যায়নি।',
-  DB_UNAVAILABLE: 'সার্ভারের ডেটাবেস এই মুহূর্তে পাওয়া যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।',
+    'This application has expired, and the seat is now available to other students. You may apply again.',
+  HOLD_CANCELLED: 'This application has already been cancelled.',
+  ALREADY_CONFIRMED: 'Admission has already been confirmed, so this application cannot be cancelled.',
+  NOT_OWNER: 'This application does not belong to this student.',
+  INVALID_STUDENT_ID: 'The birth registration number must contain exactly 17 digits.',
+  NOT_FOUND: 'The requested item could not be found.',
+  DB_UNAVAILABLE: 'The server database is currently unavailable. Please try again later.',
 };
 
 export function errorMessage(err) {
-  if (err?.code === 'VALIDATION') return `দেওয়া তথ্য সঠিক নয়: ${err.message}`;
-  return MESSAGES[err?.code] || 'কিছু একটা সমস্যা হয়েছে। একটু পরে আবার চেষ্টা করুন।';
+  if (err?.code === 'VALIDATION') return `Invalid information provided: ${err.message}`;
+  return MESSAGES[err?.code] || 'Something went wrong. Please try again later.';
 }

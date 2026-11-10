@@ -16,7 +16,11 @@ public sealed class PostgresFixture : IAsyncLifetime
     private readonly PostgreSqlContainer _pg = new PostgreSqlBuilder().WithImage("postgres:16-alpine").Build();
 
     public string ConnectionString =>
-        new NpgsqlConnectionStringBuilder(_pg.GetConnectionString()) { MaxPoolSize = 30 }.ConnectionString;
+        new NpgsqlConnectionStringBuilder(_pg.GetConnectionString())
+        {
+            MaxPoolSize = 10,
+            Timeout = 30
+        }.ConnectionString;
 
     public Task InitializeAsync() => _pg.StartAsync();
     public Task DisposeAsync() => _pg.DisposeAsync().AsTask();
