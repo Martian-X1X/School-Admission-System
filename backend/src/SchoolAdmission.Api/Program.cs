@@ -94,18 +94,30 @@ app.MapGet("/health/ready", async (NpgsqlDataSource db, CancellationToken ct) =>
 });
 
 // ---- classes ----
-app.MapPost("/classes", async (HttpRequest req, AdmissionService svc, CancellationToken ct) =>
-{
-    var body = await Helpers.ReadBodyAsync<CreateClassRequest>(req, ct);
-    var name = body.Name?.Trim();
-    if (string.IsNullOrEmpty(name)) throw ApiException.Validation("name is required.");
-    if (name.Length > 200) throw ApiException.Validation("name must be at most 200 characters.");
-    if (body.TotalSeats is null or < 1 or > 100000)
-        throw ApiException.Validation("totalSeats must be a whole number between 1 and 100000.");
+    app.MapPost("/classes", async (
+        CreateClassRequest body,
+        AdmissionService svc,
+        CancellationToken ct) =>
+    {
+        var name = body.Name?.Trim();
 
-    var created = await svc.CreateClassAsync(name, body.TotalSeats.Value, ct);
-    return Results.Created($"/classes/{created.Id}", created);
-});
+        if (string.IsNullOrEmpty(name))
+            throw ApiException.Validation("name is required.");
+
+        if (name.Length > 200)
+            throw ApiException.Validation("name must be at most 200 characters.");
+
+        if (body.TotalSeats is null or < 1 or > 100000)
+            throw ApiException.Validation(
+                "totalSeats must be a whole number between 1 and 100000.");
+
+        var created = await svc.CreateClassAsync(
+            name,
+            body.TotalSeats.Value,
+            ct);
+
+        return Results.Created($"/classes/{created.Id}", created);
+    });
 
 app.MapGet("/classes", async (AdmissionService svc, CancellationToken ct) =>
     Results.Ok(await svc.ListClassesAsync(ct)));
@@ -114,12 +126,28 @@ app.MapGet("/classes/{classId}", async (string classId, AdmissionService svc, Ca
     Results.Ok(await svc.GetClassAsync(Helpers.ParseId(classId, "Class"), ct)));
 
 // ---- holds ----
-app.MapPost("/classes/{classId}/holds", async (string classId, HttpRequest req, AdmissionService svc, CancellationToken ct) =>
-{
-    var studentId = Helpers.RequireStudentId(req);
-    var hold = await svc.CreateHoldAsync(Helpers.ParseId(classId, "Class"), studentId, ct);
-    return Results.Created($"/holds/{hold.HoldId}", hold);
-});
+    app.MapPost("/classes/{classId}/holds", async (
+        string classId,
+        [Microsoft.AspNetCore.Mvc.FromHeader(Name = "X-Student-Id")]
+        string studentId,
+        AdmissionService svc,
+        CancellationToken ct) =>
+    {
+        if (string.IsNullOrWhiteSpace(studentId) ||
+            studentId.Length != 17 ||
+            !studentId.All(char.IsDigit))
+        {
+            throw ApiException.Validation(
+                "X-Student-Id header must be a 17-digit birth registration number.");
+        }
+
+        var hold = await svc.CreateHoldAsync(
+            Helpers.ParseId(classId, "Class"),
+            studentId,
+            ct);
+
+        return Results.Created($"/holds/{hold.HoldId}", hold);
+    });
 
 app.MapGet("/holds/{holdId}", async (string holdId, AdmissionService svc, CancellationToken ct) =>
     Results.Ok(await svc.GetHoldAsync(Helpers.ParseId(holdId, "Application"), ct)));

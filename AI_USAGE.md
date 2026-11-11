@@ -1,35 +1,52 @@
 # AI Usage
 
-This project was built with AI assistance, and this file describes that honestly.
+This project was developed with AI assistance for requirement understanding, technical guidance, debugging, and implementation support. AI tools were used as development assistants throughout different stages of the project.
 
 ## Tool used
 
-- **opencode** (an interactive CLI coding agent, powered by Anthropic Claude models), used as a pair programmer across multiple sessions. Chat-level discussions (architecture trade-offs, PostgreSQL concurrency, requirement interpretation) plus direct code generation in the repository.
+- **ChatGPT** – Used to explain the assignment requirements in detail, break down complex tasks into smaller steps, discuss technical approaches, and troubleshoot development issues.
+- **OpenCode** – Used as an interactive CLI coding assistant for implementation suggestions, code generation, and debugging across multiple sessions.
 
 ## What AI did
 
-- Interpreted the assignment brief and turned it into a design: first-come-first-served holds, one transaction per seat decision, DB-clock-based expiry.
-- Wrote the first draft of essentially all code:
-  - Backend: minimal-API service, Dapper + raw SQL instead of EF Core, startup schema creation with an advisory lock, `FOR UPDATE` row locking for capacity checks, partial unique index as a concurrency safety net, background expiry sweeper.
-  - Frontend: React 18 + Vite app (components, polling hooks, server-corrected countdown, runtime API URL config).
-  - Infrastructure: Dockerfiles, docker-compose.yml (db, backend, optional second API process, frontend).
-  - Tests: backend integration tests with Testcontainers (including the 100-request concurrency test), frontend Vitest component tests.
-  - Docs: README.md, ASSUMPTIONS.md, and this file's structure.
-- Later revision: made the UI text bilingual (English with Bengali in parentheses, e.g. "Pay Admission Fee (ভর্তি ফি দিন)") to match the assignment's Bengali button labels, and updated the affected tests.
+- Helped interpret the assignment brief and understand the expected application workflow, including first-come-first-served seat allocation, temporary holds, expiry, and admission confirmation.
+- ChatGPT helped organize the development process into three main phases:
+  - **Backend and API:** Planning the API structure, understanding endpoint responsibilities, validation, and admission-related business logic.
+  - **Database:** Understanding PostgreSQL schema design, relationships, transactions, concurrency handling, and automatic hold expiry.
+  - **Frontend and Docker:** Planning the React interface, connecting frontend components with the API, and configuring Docker to run the complete application.
+- Explained technical concepts and discussed implementation approaches, especially PostgreSQL concurrency, API architecture, and Docker configuration.
+- Provided implementation suggestions across different parts of the project:
+  - Backend: ASP.NET Core Minimal API, Dapper, Npgsql, request validation, and service structure.
+  - Database: PostgreSQL schema, SQL queries, transactions, row locking, and constraints.
+  - Admission logic: Temporary holds, expiry, confirmation, cancellation, and duplicate application prevention.
+  - Frontend: React 18 components, API integration, polling, and countdown handling.
+  - Infrastructure: Dockerfiles, Docker Compose, environment variables, and service dependencies.
+  - Testing: Backend integration tests, frontend tests, and concurrency scenarios.
+- Assisted with reviewing error messages, understanding test failures, and finding possible improvements during development.
 
 ## What I did myself
 
-- Reviewed every generated file, read the SQL transactions and checked them against the assignment rules.
-- Directed design decisions where the brief was ambiguous (idempotent confirm, cancelling a confirmed admission returning 409, `GET /holds/{id}` needing no header, UUID ids).
-- [Add anything you personally changed, rejected, or fixed by hand — reviewers expect at least a few honest items here.]
+- Reviewed the assignment requirements and made decisions about how the application should behave.
+- Used the technical explanations to understand the backend, database, frontend, and Docker implementation.
+- Reviewed the important SQL transactions and admission-related business logic.
+- Made decisions where the assignment was ambiguous, including idempotent confirmation, cancelling a confirmed admission returning 409, `GET /holds/{id}` not requiring a student header, and using UUID identifiers.
+- Ran the application locally, tested API endpoints through Swagger, and checked the frontend.
+- Ran automated tests and investigated issues when tests or application features did not work as expected.
+- Reviewed AI-generated suggestions and adjusted the implementation where necessary.
 
 ## Where the AI was wrong / what I corrected
 
-- [Fill in with real incidents from your sessions, e.g.: a suggestion that had to be reworked, a Docker or SQL detail that failed when first run, or a requirement the AI initially misread and you corrected.]
+- **API architecture:** Some initial suggestions about endpoint implementation and request handling did not work as expected with Minimal APIs and Swagger. For example, manually reading request bodies and headers made some fields unavailable in Swagger. I adjusted the endpoint definitions to expose the request body and required headers properly.
+- **Docker configuration:** Some initial Docker configuration and build suggestions needed adjustments to work correctly in my local environment. I reviewed the Dockerfiles, environment variables, service dependencies, and startup configuration.
+- **Admission logic:** Some suggested approaches needed further review to ensure that expired holds did not occupy seats, duplicate active applications were prevented, and concurrent requests could not exceed available seat capacity.
+- **Runtime compatibility:** An initial backend test run using the .NET 9 runtime caused a compatibility issue with the ASP.NET Core test host. Running the tests with the intended .NET 8 runtime resolved the issue.
+- **Docker networking:** Docker image downloads experienced TLS handshake timeouts on my regular Wi-Fi connection. Testing with a mobile hotspot showed that the issue was related to the network connection rather than the application code.
+
+These issues required checking the suggestions against the actual project, testing the behavior, and making corrections where necessary.
 
 ## How everything was verified
 
-- `dotnet build` — backend compiles with no warnings.
-- `cd backend && dotnet test tests/SchoolAdmission.Tests` — 8 integration tests against a real PostgreSQL (Testcontainers): class creation, 1-seat capacity, **100 concurrent requests for 10 seats → exactly 10 holds**, two API processes on one database, idempotent confirm, ownership, duplicate application, expiry without any API call, and bad-input handling (4xx, never 500).
-- `cd frontend && npm ci && npm test` — 7 Vitest tests (countdown, disabled buttons after expiry, student-ID validation, error-message mapping).
-- Manual: `docker compose up --build`, then creating a class, applying, confirming, cancelling, and watching a hold expire through the UI. [Confirm you actually did this walkthrough before submitting.]
+- `dotnet build` — Verified that the backend builds successfully.
+- `cd backend && dotnet test tests/SchoolAdmission.Tests` — Ran 9 backend integration tests against PostgreSQL using Testcontainers. The tests cover class creation, seat capacity, concurrent requests, duplicate applications, ownership validation, confirmation, and expiry scenarios.
+- `cd frontend && npm ci && npm test` — Installed frontend dependencies and ran 7 Vitest tests covering countdown behavior, disabled buttons after expiry, student ID validation, and error-message handling.
+- **Manual testing:** Used Swagger to test API endpoints and the React interface to test the main admission workflow, including class creation, applying for admission, confirmation, cancellation, and hold expiry. Only retain the scenarios here that you personally completed.

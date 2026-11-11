@@ -1,20 +1,80 @@
 # Assumptions
 
-1. **One hold = one seat; a seat is "taken" while HELD (and not expired) or CONFIRMED.**
-   `available = total - held - confirmed`. Counts are computed from the hold rows, never from a manually maintained counter, so they cannot drift.
-2. **Why held + confirmed never exceeds total seats (also with 2 API processes).** Creating a hold runs in one PostgreSQL transaction that first
-   locks the class row (`SELECT ... FOR UPDATE`), then counts occupied seats and inserts. Requests for the same class queue on that row lock inside the
-   database, so it does not matter how many API processes exist. A class has its own lock, so different classes do not block each other.
-3. **Expiry uses the database clock** (`clock_timestamp()`), not the API server clock. Expired HELD rows are ignored by every seat count and every read
-   (status is reported as `EXPIRED`), so a seat reopens at the exact moment of expiry. A background worker only tidies the stored status; nothing depends on it.
-4. **One active application per student per class** is enforced by a partial unique index (`status IN ('HELD','CONFIRMED')`). After CANCELLED or EXPIRED the student may apply again.
-   A student may hold seats in *different* classes at the same time (the rule only says per class).
-5. **Confirm** is idempotent (repeat -> `200`, counted once). Confirm after expiry -> `409 HOLD_EXPIRED`; for someone else's hold -> `403`.
-   **Cancel** works only on a pending (HELD) hold -> `204`; repeating it is `204`; cancelling a CONFIRMED hold -> `409` (a paid admission is not undone by this endpoint).
-6. **No login**, as the brief says. The 17-digit `X-Student-Id` is trusted as identity, and the "create class" screen/API is open. In production both would need authentication and an admin role.
-   `GET /holds/{id}` needs no header (the brief lists none) and does not expose the student id.
-7. IDs are UUIDs. Class name: 1-200 chars. Seats: 1-100000. Timestamps are UTC ISO-8601.
-8. **Schema** is created at start-up from an idempotent SQL script guarded by a PostgreSQL advisory lock (safe when two processes start together) instead of EF migrations - fewer moving parts for a two-table schema.
-9. **CORS** allows any origin so the frontend can be served from any host/port.
-10. **UI** polls every 3 s; countdowns tick every second using the server's clock (Date header) so a wrong laptop clock does not matter. Server answers always win.
-11. Project structure is one API project (folders for models/service/worker) rather than 4-layer Clean Architecture: the domain is two tables, so extra layers would add files without adding safety.
+1. **One application holds one seat.** A seat is considered occupied while an application is `HELD` and has not expired, or when it is `CONFIRMED`.
+
+   Available seats are calculated as:
+
+   `Available Seats = Total Seats - Held Seats - Confirmed Seats`
+
+   These numbers are calculated from the database records instead of being stored separately. This prevents incorrect seat counts.
+
+2. **Seat limits are protected, even with multiple API servers.**
+
+   When a student applies, the system locks the selected class record, checks the available seats, and creates the hold within one database transaction.
+
+   This prevents two students from taking the same remaining seat at the same time. It also works if multiple API processes are running.
+
+3. **Application expiry is controlled by the database clock.**
+
+   The system uses PostgreSQL's clock instead of the API server's clock to calculate expiry times.
+
+   Once a hold expires, it no longer occupies a seat and its status is treated as `EXPIRED`. A background worker updates the stored status, but seat availability does not depend on that worker.
+
+4. **A student can have only one active application per class.**
+
+   A student cannot create another active application for the same class while their existing application is `HELD` or `CONFIRMED`.
+
+   However, after an application is `CANCELLED` or `EXPIRED`, the student can apply again. A student can also apply to different classes at the same time.
+
+5. **Confirmation and cancellation rules.**
+
+   - **Confirm:** Confirming an application more than once does not create duplicate admissions. A successful confirmation returns `200`.
+   - **Expired application:** An expired application cannot be confirmed and returns `409 HOLD_EXPIRED`.
+   - **Ownership:** A student cannot confirm or cancel another student's application. This returns `403`.
+   - **Cancel:** A pending (`HELD`) application can be cancelled. Repeating the cancellation is also allowed and returns `204`.
+   - **Confirmed application:** A confirmed admission cannot be cancelled through this endpoint and returns `409`.
+
+6. **No login or authentication is required.**
+
+   The assignment does not require a login system. The 17-digit `X-Student-Id` header is used to identify students.
+
+   The class creation screen and API are also accessible without authentication.
+
+   In a real production application, student authentication and admin permissions would be required.
+
+   `GET /holds/{id}` does not require a student ID header because the assignment does not specify one. It also does not return the student's ID.
+
+7. **ID, validation, and date formats.**
+
+   - Class and application IDs use UUID format.
+   - Class names must contain between 1 and 200 characters.
+   - Seat counts must be between 1 and 100000.
+   - All timestamps are stored and returned in UTC using ISO 8601 format.
+
+8. **Database structure is created automatically.**
+
+   The required database tables are created when the API starts.
+
+   Instead of using Entity Framework migrations, the project uses an SQL schema script. A PostgreSQL advisory lock prevents multiple API processes from trying to initialize the database at the same time.
+
+   This approach keeps the database setup simple for this project.
+
+9. **CORS configuration.**
+
+   CORS allows requests from any origin so the React frontend can communicate with the API from different hosts or ports.
+
+   For a production application, this should be restricted to trusted frontend domains.
+
+10. **Frontend updates and countdown.**
+
+    The frontend checks for updated application and seat information every 3 seconds.
+
+    The countdown updates every second and uses the server's clock information to avoid problems caused by an incorrect computer clock.
+
+    The server response is always treated as the final source of truth.
+
+11. **Project structure.**
+
+    The backend uses one ASP.NET Core API project with separate folders for models, services, and background workers.
+
+    A full Clean Architecture structure was not used because this project has a relatively small domain and only a few database tables. Keeping the structure simple makes the code easier to navigate and maintain.
